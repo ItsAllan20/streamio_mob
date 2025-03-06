@@ -15,27 +15,31 @@ class _LoginPageState extends State<LoginPage> {
   final storage = FlutterSecureStorage();
 
   Future<void> login() async {
-    final response = await http.post(
-      Uri.parse('https://ton-api.com/login'),
-      body: {
-        'username': usernameController.text,
-        'password': passwordController.text,
-      },
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => DeviceListPage()),
     );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      await storage.write(key: 'token', value: data['token']);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DeviceListPage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Connexion échouée')),
-      );
-    }
+    // final response = await http.post(
+    //   Uri.parse('https://ton-api.com/login'),
+    //   body: {
+    //     'username': usernameController.text,
+    //     'password': passwordController.text,
+    //   },
+    // );
+    //
+    // if (response.statusCode == 200) {
+    //   final data = jsonDecode(response.body);
+    //   await storage.write(key: 'token', value: data['token']);
+    //
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => DeviceListPage()),
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Connexion échouée')),
+    //   );
+    // }
   }
 
   @override

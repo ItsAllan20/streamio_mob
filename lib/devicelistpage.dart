@@ -11,32 +11,34 @@ class DeviceListPage extends StatefulWidget {
 
 class _DeviceListPageState extends State<DeviceListPage> {
   final storage = FlutterSecureStorage();
-  List devices = [];
+  List devices = [
+    {"id": "test", "name": "caca", "price": "30000"},
+  ];
 
   Future<void> fetchDevices() async {
-    String? token = await storage.read(key: 'token');
-
     final response = await http.get(
-      Uri.parse('https://ton-api.com/devices'),
-      headers: {'Authorization': 'Bearer $token'},
+      Uri.parse('http://localhost:3000/api/devices'),
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        devices = jsonDecode(response.body);
+        print(response.body);
+        devices = jsonDecode(response.body)['data'];
       });
     }
   }
 
-  Future<void> deleteDevice(int id) async {
-    String? token = await storage.read(key: 'token');
+  Future<void> deleteDevice(String id) async {
+    setState(() {
+      devices.removeWhere((d) => d["id"] == id);
+    });
 
-    await http.delete(
-      Uri.parse('https://ton-api.com/devices/$id'),
-      headers: {'Authorization': 'Bearer $token'},
+    final response = await http.delete(
+      Uri.parse('http://localhost:3000/api/devices'),
+      body: jsonEncode({'deviceId': id}),
     );
-
-    fetchDevices();
+    jsonDecode(response.body);
+    print(response.body);
   }
 
   @override
@@ -55,8 +57,10 @@ class _DeviceListPageState extends State<DeviceListPage> {
           final device = devices[index];
           return ListTile(
             title: Text(device['name'], style: TextStyle(color: Colors.white)),
-            subtitle: Text("Prix: ${device['price']}",
-                style: TextStyle(color: Colors.orange)),
+            subtitle: Text(
+              "Prix: ${device['price']}",
+              style: TextStyle(color: Colors.orange),
+            ),
             trailing: IconButton(
               icon: Icon(Icons.delete, color: Colors.red),
               onPressed: () => deleteDevice(device['id']),
@@ -68,11 +72,19 @@ class _DeviceListPageState extends State<DeviceListPage> {
         backgroundColor: Colors.orange,
         child: Icon(Icons.add, color: Colors.black),
         onPressed: () async {
+          // setState(() {
+          //   devices.add({
+          //     "id": devices.length.toString(),
+          //     "name": "caca",
+          //     "price": "30000",
+          //   });
+          // });
           bool? result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CreateDevicePage()),
           );
-          if (result == true) fetchDevices();
+          fetchDevices();
+          // if (result == true) fetchDevices();
         },
       ),
     );
